@@ -1,0 +1,18 @@
+[
+  {"number":"01","title":"Track 01","file":"audio/track_01.ogg"},
+  {"number":"02","title":"Main Title","file":"audio/track_02.ogg"},
+  {"number":"03","title":"Track 03","file":"audio/track_03.ogg"},
+  {"number":"04","title":"Track 04","file":"audio/track_04.ogg"},
+  {"number":"05","title":"Main Theme","file":"audio/track_05.ogg"},
+  {"number":"06","title":"Track 06","file":"audio/track_06.ogg"},
+  {"number":"07","title":"Track 07","file":"audio/track_07.ogg"},
+  {"number":"08","title":"Track 08","file":"audio/track_08.ogg"},
+  {"number":"09","title":"Track 09","file":"audio/track_09.ogg"},
+  {"number":"10","title":"Track 10","file":"audio/track_10.ogg"},
+  {"number":"11","title":"Track 11","file":"audio/track_11.ogg"},
+  {"number":"12","title":"Track 12","file":"audio/track_12.ogg"},
+  {"number":"13","title":"Track 13","file":"audio/track_13.ogg"},
+  {"number":"14","title":"Track 14","file":"audio/track_14.ogg"},
+  {"number":"15","title":"Track 15","file":"audio/track_15.ogg"},
+  {"number":"16","title":"Track 16","file":"audio/track_16.ogg"}
+]
