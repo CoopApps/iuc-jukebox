@@ -91,7 +91,10 @@ class MT32Processor extends AudioWorkletProcessor {
       .then((mt32) => {
         this._mt32 = mt32;
 
-        // Load ROMs
+        // Create the MT-32 context (must be called before anything else)
+        mt32._synth_create();
+
+        // Load ROMs — positive return = success (1=ctrl, 2=pcm), negative = error
         const ctrlOk = this._loadRom(
           mt32.HEAPU8, mt32._malloc, mt32._free,
           mt32._synth_add_rom.bind(mt32),
@@ -103,15 +106,15 @@ class MT32Processor extends AudioWorkletProcessor {
           pcmRom
         );
 
-        if (!ctrlOk || !pcmOk) {
-          this.port.postMessage({ type: 'error', message: 'ROM loading failed' });
+        if (ctrlOk < 0 || pcmOk < 0) {
+          this.port.postMessage({ type: 'error', message: `ROM loading failed (ctrl=${ctrlOk}, pcm=${pcmOk})` });
           return;
         }
 
-        // Open synth at the AudioWorklet sample rate
+        // Open synth — returns 0 on success, non-zero on failure
         const opened = mt32._synth_open(sampleRate);
-        if (!opened) {
-          this.port.postMessage({ type: 'error', message: 'synth_open failed' });
+        if (opened !== 0) {
+          this.port.postMessage({ type: 'error', message: `synth_open failed (rc=${opened})` });
           return;
         }
 

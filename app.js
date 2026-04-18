@@ -109,7 +109,7 @@
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     if (audioCtx.state === "suspended") await audioCtx.resume();
 
-    elNowPlaying.textContent = "Loading MT-32 synthesizer…";
+    elNowPlaying.textContent = "Downloading MT-32 synthesizer… (first visit ~5 s)";
 
     /* Fetch all assets in parallel */
     const [jsText, wasmBuf, ctrlRom, pcmRom, workletText] = await Promise.all([
@@ -146,9 +146,10 @@
 
     /* Handshake: send ROMs + WASM to worklet, wait for 'ready' */
     await new Promise((resolve, reject) => {
+      const timer = setTimeout(() => reject(new Error("MT-32 init timed out — check browser console")), 45000);
       mt32Node.port.onmessage = ({ data }) => {
-        if (data.type === "ready")  resolve(data.sampleRate);
-        if (data.type === "error")  reject(new Error(data.message));
+        if (data.type === "ready")  { clearTimeout(timer); resolve(data.sampleRate); }
+        if (data.type === "error")  { clearTimeout(timer); reject(new Error(data.message)); }
       };
       mt32Node.port.postMessage(
         { type: "init", wasmBinary: wasmBuf, ctrlRom, pcmRom },
