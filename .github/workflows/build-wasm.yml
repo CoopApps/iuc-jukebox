@@ -1,0 +1,64 @@
+name: Build mt32emu WASM
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'build/mt32wrap.c'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Emscripten SDK
+        uses: mymindstorm/setup-emsdk@v14
+        with:
+          version: 3.1.61
+
+      - name: Clone munt (libmt32emu_2_7_0)
+        run: |
+          git clone --depth 1 --branch libmt32emu_2_7_0 https://github.com/munt/munt.git munt/
+
+      - name: Build libmt32emu as static WASM library
+        run: |
+          cd munt/mt32emu
+          emcmake cmake \
+            -DCMAKE_BUILD_TYPE=MinSizeRel \
+            -DMT32EMU_BUILD_SHARED_LIBS=OFF \
+            -DMT32EMU_WITH_INTERNAL_RESAMPLER=ON \
+            -DMT32EMU_INSTALL=OFF \
+            -B emscripten_build .
+          emmake make -C emscripten_build -j$(nproc) mt32emu-static
+          cp emscripten_build/libmt32emu.a ../../build/
+
+      - name: Compile wrapper to WASM
+        run: |
+          cd build
+          emcc mt32wrap.c libmt32emu.a \
+            -I../munt/mt32emu/src \
+            -O2 \
+            -s WASM=1 \
+            -s MODULARIZE=1 \
+            -s EXPORT_NAME=MT32Module \
+            -s ALLOW_MEMORY_GROWTH=1 \
+            -s INITIAL_MEMORY=33554432 \
+            -s ENVIRONMENT=worker \
+            -s EXPORTED_FUNCTIONS='["_synth_create","_synth_add_rom","_synth_open","_synth_get_samplerate","_synth_play_msg","_synth_play_sysex","_synth_render","_synth_close","_malloc","_free"]' \
+            -s EXPORTED_RUNTIME_METHODS='["HEAPU8","HEAP16"]' \
+            --no-entry \
+            -o mt32emu.js
+
+      - name: Commit and push built artifacts
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add build/mt32emu.js build/mt32emu.wasm
+          git diff --staged --quiet || git commit -m "ci: rebuild mt32emu WASM [skip ci]"
+          git push
