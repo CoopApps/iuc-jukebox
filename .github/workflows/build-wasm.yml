@@ -41,8 +41,6 @@ jobs:
         run: |
           cd build
           emcc mt32wrap.c libmt32emu.a \
-            -I../munt/mt32emu/src \
-            -I../munt/mt32emu/emscripten_build \
             -O2 \
             -s WASM=1 \
             -s MODULARIZE=1 \
