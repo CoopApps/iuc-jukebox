@@ -31,11 +31,10 @@ jobs:
           cd munt/mt32emu
           emcmake cmake \
             -DCMAKE_BUILD_TYPE=MinSizeRel \
-            -DMT32EMU_BUILD_SHARED_LIBS=OFF \
-            -DMT32EMU_WITH_INTERNAL_RESAMPLER=ON \
-            -DMT32EMU_INSTALL=OFF \
+            -DBUILD_SHARED_LIBS=OFF \
+            -DCMAKE_SKIP_INSTALL_RULES=ON \
             -B emscripten_build .
-          emmake make -C emscripten_build -j$(nproc) mt32emu-static
+          emmake make -C emscripten_build -j$(nproc)
           cp emscripten_build/libmt32emu.a ../../build/
 
       - name: Compile wrapper to WASM
